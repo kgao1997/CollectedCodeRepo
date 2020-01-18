@@ -1,0 +1,65 @@
+
+    def maxDepthHelper(self, root): 
+        if root == None: 
+            return 0 
+        else: 
+            return 1 + max(self.maxDepthHelper(root.left), self.maxDepthHelper(root.right))
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+        
+        :type root: TreeNode
+        :rtype: str
+        """
+        #Trivial corner case: 
+        if root == None: 
+            return ''
+        #reconstruct tree, BFS. Node that null nodes are given 0 flag, 0 value. 
+        #Nulls: '2', non-nulls = actual value (0, 1) (Proxy a perfect tree, find max_depth of tree?)
+        max_depth = self.maxDepthHelper(root)
+        str_length = 2 ** max_depth + 1 #for root
+        tree_str = []
+        for i in range(0, str_length): 
+            tree_str.append('2') #Note that 2's should never appear for valid nodes 
+        #then overwrite values in tree_str with appropriate values in binary string 
+        root_index = 0 
+        node_queue = [(root, 0)] #tuple: root, index
+        while len(node_queue) != 0: 
+            (node, index) = node_queue.pop(0)
+            if node != None: 
+                #print(node.val)
+                tree_str[index] = str(node.val) 
+                node_queue.append((node.left, 2 * index + 1))
+                node_queue.append((node.right, 2 * index + 2))
+        print(tree_str)
+        tree_str = ''.join(tree_str)
+        return tree_str
+        
+        
+        
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+        
+        :type data: str
+        :rtype: TreeNode
+        """
+        #Corner case
+        if data == '': 
+            return None
+        #else, use indexing to rebuild the encoded tree 
+        index = 0 
+        root = TreeNode(data[index])
+        node_queue = [(root, 0)]
+        while len(node_queue) != 0: 
+            (node, index) = node_queue.pop(0)
+            if 2 * index > len(data): 
+                continue #skip past terminating node 
+            if data[2 * index + 1] != '2':
+                left_child = TreeNode(int(data[2 * index + 1]))
+                node_queue.append((left_child, 2 * index + 1))
+                node.left = left_child
+            if data[2 * index + 1] != '2': 
+                right_child = TreeNode(int(data[2 * index + 2]))
+                node_queue.append((right_child, 2 * index + 2))
+                node.right = right_child
+        return root
